@@ -8,7 +8,8 @@ import (
 
 func main() {
 	query := badswede.Query{"Gothenburg Open 2015", []string{"Rasmus Janmyr"}}
-	tournament, err := badswede.Scrape(query)
+	scraper := badswede.NewScraper()
+	tournament, err := scraper.Scrape(query)
 	if err != nil {
 		panic(err)
 	}
