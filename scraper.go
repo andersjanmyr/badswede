@@ -14,17 +14,26 @@ type Query struct {
 	Players    []string
 }
 
-type Match struct {
-	PlannedTime string
-	Draw        string
-	Left        string
-	Right       string
-	Result      string
-}
-
 type Tournament struct {
 	Name    string
 	Matches []Match
+}
+
+type Match struct {
+	PlannedTime string
+	Draw        Resource
+	Left        Team
+	Right       Team
+	Result      string
+}
+
+type Team struct {
+	players []Resource
+}
+
+type Resource struct {
+	Name string
+	Url  string
 }
 
 type Scraper struct {
@@ -45,24 +54,18 @@ func (self *Scraper) Scrape(query Query) (tournament *Tournament, err error) {
 	if err != nil {
 		return
 	}
+	tournament = &Tournament{s.Text(), make([]Match, 0)}
 	tournamentUrl := s.AttrOr("href", MISSING)
 	matchUrls, err := self.findMatchPages(tournamentUrl)
 	if err != nil {
 		return
 	}
 
-	tournament = &Tournament{s.Text(), make([]Match, 0)}
 	for _, url := range matchUrls {
 		matches, _ := self.findMatches(url)
 		matches.Each(func(_ int, s *goquery.Selection) {
-			if hasPlayer(s, query.Players) {
-				match := Match{
-					PlannedTime: strings.TrimSpace(s.Find(".plannedtime").Text()),
-					Draw:        strings.TrimSpace(s.Find("td:nth-child(3)").Text()),
-					Left:        strings.TrimSpace(s.Find("td:nth-child(4)").Text()),
-					Right:       strings.TrimSpace(s.Find("td:nth-child(6)").Text()),
-					Result:      strings.TrimSpace(s.Find("td:nth-child(7)").Text()),
-				}
+			if self.hasPlayer(s, query.Players) {
+				match := self.parseMatch(s)
 				tournament.Matches = append(tournament.Matches, match)
 			}
 		})
@@ -121,7 +124,7 @@ func (self *Scraper) findMatches(url string) (*goquery.Selection, error) {
 	return selection, nil
 }
 
-func hasPlayer(selection *goquery.Selection, players []string) bool {
+func (self *Scraper) hasPlayer(selection *goquery.Selection, players []string) bool {
 	text := selection.Find("td:nth-child(4)").Text() + " " + selection.Find("td:nth-child(6)").Text()
 	if len(strings.TrimSpace(text)) == 0 {
 		return false
@@ -132,4 +135,39 @@ func hasPlayer(selection *goquery.Selection, players []string) bool {
 		}
 	}
 	return false
+}
+
+func (self *Scraper) parseMatch(selection *goquery.Selection) Match {
+	match := Match{
+		PlannedTime: selection.Find(".plannedtime").Text(),
+		Draw:        self.parseResource(selection.Find("td:nth-child(3)")),
+		Left:        self.parseTeam(selection.Find("td:nth-child(4)")),
+		Right:       self.parseTeam(selection.Find("td:nth-child(6)")),
+		Result:      selection.Find("td:nth-child(7)").Text(),
+	}
+	return match
+}
+
+func (self *Scraper) parseResource(selection *goquery.Selection) Resource {
+	s := selection.Find("a")
+	href, _ := self.browser.ResolveStringUrl(s.AttrOr("href", MISSING))
+	resource := Resource{
+		Name: s.Text(),
+		Url:  href,
+	}
+	return resource
+}
+
+func (self *Scraper) parseTeam(selection *goquery.Selection) Team {
+	anchors := selection.Find("a")
+	team := Team{}
+	anchors.Each(func(_ int, s *goquery.Selection) {
+		href, _ := self.browser.ResolveStringUrl(s.AttrOr("href", MISSING))
+		resource := Resource{
+			Name: s.Text(),
+			Url:  href,
+		}
+		team.players = append(team.players, resource)
+	})
+	return team
 }
