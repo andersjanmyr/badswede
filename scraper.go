@@ -3,6 +3,7 @@ package badswede
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/headzoo/surf"
@@ -14,8 +15,17 @@ type Query struct {
 	Players    []string
 }
 
+type Match struct {
+	PlannedTime string
+	Draw        string
+	Left        string
+	Right       string
+	Result      string
+}
+
 type Tournament struct {
-	Name string
+	Name    string
+	Matches []Match
 }
 
 type Scraper struct {
@@ -29,17 +39,32 @@ func NewScraper() *Scraper {
 
 const MISSING = "missing"
 
-func (self *Scraper) Scrape(query Query) (*Tournament, error) {
+func (self *Scraper) Scrape(query Query) (tournament *Tournament, err error) {
 	log.Println(query)
+	tournament = nil
 	result, err := self.findTournaments(query.Tournament)
 	if err != nil {
-		return nil, err
+		return
 	}
 	result.Each(func(_ int, s *goquery.Selection) {
+		tournament = &Tournament{s.Text(), make([]Match, 0)}
 		matches, _ := self.findMatches(s.AttrOr("href", MISSING))
-		fmt.Println(matches.Text())
+		matches.Each(func(_ int, s *goquery.Selection) {
+			if hasPlayer(s, query.Players) {
+				match := Match{
+					PlannedTime: s.Find(".plannedtime").Text(),
+					Draw:        s.Find("td:nth-child(3)").Text(),
+					Left:        s.Find("td:nth-child(4)").Text(),
+					Right:       s.Find("td:nth-child(6)").Text(),
+					Result:      s.Find("td:nth-child(7)").Text(),
+				}
+				html, _ := s.Html()
+				fmt.Println("html", html)
+				tournament.Matches = append(tournament.Matches, match)
+			}
+		})
 	})
-	return nil, nil
+	return
 }
 
 func (self *Scraper) findTournaments(tournament string) (*goquery.Selection, error) {
@@ -82,4 +107,18 @@ func (self *Scraper) findMatches(url string) (*goquery.Selection, error) {
 	selection := self.browser.Dom().Find(matchesRowSelector)
 	log.Println("selection", selection.Text())
 	return selection, nil
+}
+
+func hasPlayer(selection *goquery.Selection, players []string) bool {
+	text := selection.Find("td:nth-child(4)").Text() + " " + selection.Find("td:nth-child(6)").Text()
+	fmt.Println("text", text, players)
+	if len(strings.TrimSpace(text)) == 0 {
+		return false
+	}
+	for _, player := range players {
+		if strings.Contains(text, player) {
+			return true
+		}
+	}
+	return false
 }

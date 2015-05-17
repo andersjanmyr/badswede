@@ -7,12 +7,12 @@ import (
 )
 
 func main() {
-	query := badswede.Query{"Gothenburg Open 2015", []string{"Rasmus Janmyr"}}
+	query := badswede.Query{"Gothenburg Open 2015", []string{"Rasmus Janmyr", "Tove", "Simon"}}
 	scraper := badswede.NewScraper()
 	tournament, err := scraper.Scrape(query)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(tournament)
+	fmt.Printf("%#v\n", tournament)
 }
