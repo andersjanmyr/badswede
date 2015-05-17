@@ -1,7 +1,6 @@
 package badswede
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -42,32 +41,36 @@ const MISSING = "missing"
 func (self *Scraper) Scrape(query Query) (tournament *Tournament, err error) {
 	log.Println(query)
 	tournament = nil
-	result, err := self.findTournaments(query.Tournament)
+	s, err := self.findTournamentUrl(query.Tournament)
 	if err != nil {
 		return
 	}
-	result.Each(func(_ int, s *goquery.Selection) {
-		tournament = &Tournament{s.Text(), make([]Match, 0)}
-		matches, _ := self.findMatches(s.AttrOr("href", MISSING))
+	tournamentUrl := s.AttrOr("href", MISSING)
+	matchUrls, err := self.findMatchPages(tournamentUrl)
+	if err != nil {
+		return
+	}
+
+	tournament = &Tournament{s.Text(), make([]Match, 0)}
+	for _, url := range matchUrls {
+		matches, _ := self.findMatches(url)
 		matches.Each(func(_ int, s *goquery.Selection) {
 			if hasPlayer(s, query.Players) {
 				match := Match{
-					PlannedTime: s.Find(".plannedtime").Text(),
-					Draw:        s.Find("td:nth-child(3)").Text(),
-					Left:        s.Find("td:nth-child(4)").Text(),
-					Right:       s.Find("td:nth-child(6)").Text(),
-					Result:      s.Find("td:nth-child(7)").Text(),
+					PlannedTime: strings.TrimSpace(s.Find(".plannedtime").Text()),
+					Draw:        strings.TrimSpace(s.Find("td:nth-child(3)").Text()),
+					Left:        strings.TrimSpace(s.Find("td:nth-child(4)").Text()),
+					Right:       strings.TrimSpace(s.Find("td:nth-child(6)").Text()),
+					Result:      strings.TrimSpace(s.Find("td:nth-child(7)").Text()),
 				}
-				html, _ := s.Html()
-				fmt.Println("html", html)
 				tournament.Matches = append(tournament.Matches, match)
 			}
 		})
-	})
+	}
 	return
 }
 
-func (self *Scraper) findTournaments(tournament string) (*goquery.Selection, error) {
+func (self *Scraper) findTournamentUrl(tournament string) (*goquery.Selection, error) {
 	err := self.browser.Open("http://badmintonsweden.tournamentsoftware.com")
 	if err != nil {
 		return nil, err
@@ -84,34 +87,42 @@ func (self *Scraper) findTournaments(tournament string) (*goquery.Selection, err
 	log.Println(self.browser.Title())
 	tournamentLinkSelector := "#cphPage_cphPage_tournamentlistpage_maincolumn_ctl06_ctl00_row1 h3 a"
 	selection := self.browser.Dom().Find(tournamentLinkSelector)
+
 	return selection, nil
 }
 
-func (self *Scraper) findMatches(url string) (*goquery.Selection, error) {
-	absoluteUrl, err := self.browser.ResolveStringUrl(url)
+func (self *Scraper) findMatchPages(url string) ([]string, error) {
+	absoluteUrl, _ := self.browser.ResolveStringUrl(url)
 	log.Println("tournamentUrl", absoluteUrl)
-	err = self.browser.Open(absoluteUrl)
+	err := self.browser.Open(absoluteUrl)
 	if err != nil {
 		return nil, err
 	}
 	log.Println(self.browser.Title())
-	matchesLinkSelector := "#cphPage_cphPage_tmTournamentMenu li:nth-child(5) a"
-	matchesHref := self.browser.Dom().Find(matchesLinkSelector).AttrOr("href", MISSING)
-	absoluteUrl, err = self.browser.ResolveStringUrl(matchesHref)
-	log.Println("matchesUrl", absoluteUrl)
-	err = self.browser.Open(absoluteUrl)
+	matchesLinkSelector := ".tournamentcalendar a"
+	matches := self.browser.Dom().Find(matchesLinkSelector)
+	urls := make([]string, 0)
+	matches.Each(func(_ int, s *goquery.Selection) {
+		var url, _ = self.browser.ResolveStringUrl(s.AttrOr("href", MISSING))
+		urls = append(urls, url)
+	})
+	log.Println("urls", urls)
+	return urls, nil
+}
+
+func (self *Scraper) findMatches(url string) (*goquery.Selection, error) {
+	log.Println("matchesUrl", url)
+	err := self.browser.Open(url)
 	if err != nil {
 		return nil, err
 	}
 	matchesRowSelector := ".matches tbody tr"
 	selection := self.browser.Dom().Find(matchesRowSelector)
-	log.Println("selection", selection.Text())
 	return selection, nil
 }
 
 func hasPlayer(selection *goquery.Selection, players []string) bool {
 	text := selection.Find("td:nth-child(4)").Text() + " " + selection.Find("td:nth-child(6)").Text()
-	fmt.Println("text", text, players)
 	if len(strings.TrimSpace(text)) == 0 {
 		return false
 	}
