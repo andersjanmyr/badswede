@@ -14,7 +14,9 @@ import (
 func renderFunc(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path, r.Host)
 	render := render.New(render.Options{Layout: "layout"})
-	query := badswede.Query{"Gothenburg Open 2015", []string{"Rasmus Janmyr", "Tove Rasmusson", "Nils Ihse"}}
+	tournamentName := r.FormValue("tournament")
+	log.Println("tournamentName", tournamentName)
+	query := badswede.Query{tournamentName, []string{"Rasmus Janmyr", "Tove Rasmusson", "Nils Ihse"}}
 	scraper := badswede.NewScraper()
 	tournament, err := scraper.Scrape(query)
 	if err != nil {

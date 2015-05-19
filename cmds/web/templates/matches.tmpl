@@ -1,3 +1,10 @@
+<form class='search' action='/'>
+  <input name='tournament' placeholder='Sök tävling' value='{{.Name}}' autofocus/>
+  <a target='_blank' href='http://badmintonsweden.tournamentsoftware.com/'>
+    Hitta din tävling på Badminton Sweden!
+  </a>
+</form>
+
 <ul>
   {{range $match := .Matches}}
   <li>

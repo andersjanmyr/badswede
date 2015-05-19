@@ -16,7 +16,22 @@ a:hover, a:visited {
   background-color: white;
   padding: 30px 0;
   margin: 60px;
+  margin: 0 30px;
 }
+
+.search {
+  margin: 5px;
+}
+
+input {
+  font-size: 18pt;
+  font-family: Verdana, sans-serif;
+  border-radius: 5px;
+  border: inset #ddd 2px;
+  padding: 3px 6px;
+  width: 400px;
+}
+
 
 ul {
   margin 0;
@@ -27,7 +42,6 @@ li {
   list-style-type: none;
   clear: both;
   padding: 10px;
-  margin: 0 30px;
 }
 
 li > div {
