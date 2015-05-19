@@ -2,6 +2,7 @@ package badswede
 
 import (
 	"log"
+	"net/url"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -20,6 +21,7 @@ type Tournament struct {
 }
 
 type Match struct {
+	Date        string
 	PlannedTime string
 	Draw        Resource
 	Left        Team
@@ -61,11 +63,13 @@ func (self *Scraper) Scrape(query Query) (tournament *Tournament, err error) {
 		return
 	}
 
-	for _, url := range matchUrls {
-		matches, _ := self.findMatches(url)
+	for _, u := range matchUrls {
+		matches, _ := self.findMatches(u)
+		parsedUrl, _ := url.Parse(u)
+		date := parsedUrl.Query().Get("d")
 		matches.Each(func(_ int, s *goquery.Selection) {
 			if self.hasPlayer(s, query.Players) {
-				match := self.parseMatch(s)
+				match := self.parseMatch(s, date)
 				tournament.Matches = append(tournament.Matches, match)
 			}
 		})
@@ -137,8 +141,9 @@ func (self *Scraper) hasPlayer(selection *goquery.Selection, players []string) b
 	return false
 }
 
-func (self *Scraper) parseMatch(selection *goquery.Selection) Match {
+func (self *Scraper) parseMatch(selection *goquery.Selection, date string) Match {
 	match := Match{
+		Date:        date,
 		PlannedTime: selection.Find(".plannedtime").Text(),
 		Draw:        self.parseResource(selection.Find("td:nth-child(3)")),
 		Left:        self.parseTeam(selection.Find("td:nth-child(4)")),

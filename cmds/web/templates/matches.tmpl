@@ -1,6 +1,7 @@
 <ul>
   {{range $match := .Matches}}
   <li>
+    <div class='date'>{{$match.Date}}</div>
     <div class='planned-time'>{{$match.PlannedTime}}</div>
     <div class='draw'><a href='{{$match.Draw.Url}}'>{{$match.Draw.Name}}</a></div>
     <div class='left'>

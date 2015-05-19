@@ -1,5 +1,6 @@
 body {
   background-image: url(http://lugibadminton.se.preview.binero.se/wp-content/uploads/2014/05/bg.jpg);
+  font-family: Palatino, serif;
 }
 
 a {
@@ -45,7 +46,6 @@ li:nth-child(2n) {
 }
 
 .draw {
-  font-family: Palatino, serif;
   font-size: 16px;
   padding: 5px;
   width: 200px;
@@ -83,7 +83,6 @@ li:nth-child(2n) {
 }
 
 .result {
-  font-family: Palatino, serif;
   font-size: 18px;
   padding: 5px;
 }
