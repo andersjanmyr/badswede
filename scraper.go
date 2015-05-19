@@ -130,7 +130,7 @@ func (self *Scraper) hasPlayer(selection *goquery.Selection, players []string) b
 		return false
 	}
 	for _, player := range players {
-		if strings.Contains(text, player) {
+		if strings.Contains(strings.ToLower(text), strings.ToLower(player)) {
 			return true
 		}
 	}
