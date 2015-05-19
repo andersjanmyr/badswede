@@ -1,5 +1,20 @@
 <ul>
   {{range $match := .Matches}}
-  <li>{{$match}}</li>
-  {{ end }}
+  <li>
+    <div class='planned-time'>{{$match.PlannedTime}}</div>
+    <div class='draw'><a href='{{$match.Draw.Url}}'>{{$match.Draw.Name}}</a></div>
+    <div class='left'>
+      {{range $player := $match.Left.Players}}
+      <a href='{{$player.Url}}'>{{$player.Name}}</a>
+      {{end}}
+    </div>
+    <div class='team-separator'>—</div>
+    <div class='right'>
+      {{range $player := $match.Right.Players}}
+      <a href='{{$player.Url}}'>{{$player.Name}}</a>
+      {{end}}
+    </div>
+    <div class='result'>{{$match.Result}}</div>
+  </li>
+  {{end}}
 </ul>

@@ -28,7 +28,7 @@ type Match struct {
 }
 
 type Team struct {
-	players []Resource
+	Players []Resource
 }
 
 type Resource struct {
@@ -159,7 +159,7 @@ func (self *Scraper) parseResource(selection *goquery.Selection) Resource {
 }
 
 func (self *Scraper) parseTeam(selection *goquery.Selection) Team {
-	anchors := selection.Find("a")
+	anchors := selection.Find("a.plynk")
 	team := Team{}
 	anchors.Each(func(_ int, s *goquery.Selection) {
 		href, _ := self.browser.ResolveStringUrl(s.AttrOr("href", MISSING))
@@ -167,7 +167,7 @@ func (self *Scraper) parseTeam(selection *goquery.Selection) Team {
 			Name: s.Text(),
 			Url:  href,
 		}
-		team.players = append(team.players, resource)
+		team.Players = append(team.Players, resource)
 	})
 	return team
 }

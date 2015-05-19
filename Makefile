@@ -15,12 +15,10 @@ run: build-cli
 .PHONY: build-web
 build-web: bin
 	go build -o bin/badswede-web cmds/web/main.go
-	cp -r cmds/web/templates bin
-	cp -r cmds/web/static bin
 
 .PHONY: web
 web: build-web
-	(cd bin && ./badswede-web)
+	(cd cmds/web/ && ../../bin/badswede-web)
 
 .PHONY: clean
 clean:

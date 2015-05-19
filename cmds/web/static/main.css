@@ -1,3 +1,90 @@
 body {
-  background: yellow;
+  background-image: url(http://lugibadminton.se.preview.binero.se/wp-content/uploads/2014/05/bg.jpg);
 }
+
+a {
+  color: #555;
+  text-decoration: none;
+}
+
+a:hover, a:visited {
+  text-decoration: underline;
+}
+
+.container {
+  background-color: white;
+  padding: 30px 0;
+  margin: 60px;
+}
+
+ul {
+  margin 0;
+  padding: 0;
+}
+
+li {
+  list-style-type: none;
+  clear: both;
+  padding: 10px;
+  margin: 0 30px;
+}
+
+li > div {
+  display: inline-block;
+}
+
+li:nth-child(2n) {
+  background-color: #eee;
+}
+
+.planned-time {
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  font-size: 18px;
+  padding: 5px;
+  width: 80px;
+}
+
+.draw {
+  font-family: Palatino, serif;
+  font-size: 16px;
+  padding: 5px;
+  width: 200px;
+}
+
+.left {
+  width: 200px;
+  padding: 5px;
+}
+
+.left a {
+  display: block;
+  font-family: Verdana, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: right;
+}
+.team-separator {
+  font-size: 18px;
+  padding: 0 5px;
+  margin: auto;
+}
+
+.right {
+  width: 300px;
+  padding: 5px;
+}
+
+.right a {
+  display: block;
+  font-family: Verdana, sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: left;
+}
+
+.result {
+  font-family: Palatino, serif;
+  font-size: 18px;
+  padding: 5px;
+}
+
