@@ -11,12 +11,22 @@ import (
 	"github.com/unrolled/render"
 )
 
+var PLAYERS = []string{
+	"Christian Möller",
+	"Isabella Bergman",
+	"Isak Sanick",
+	"Johanna Sjöstedt",
+	"Nils Ihse",
+	"Rasmus Janmyr",
+	"Tove Rasmusson",
+}
+
 func renderFunc(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path, r.Host)
 	render := render.New(render.Options{Layout: "layout"})
 	tournamentName := r.FormValue("tournament")
 	log.Println("tournamentName", tournamentName)
-	query := badswede.Query{tournamentName, []string{"Rasmus Janmyr", "Tove Rasmusson", "Nils Ihse"}}
+	query := badswede.Query{tournamentName, PLAYERS}
 	scraper := badswede.NewScraper()
 	tournament, err := scraper.Scrape(query)
 	if err != nil {
