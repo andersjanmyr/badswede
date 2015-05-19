@@ -16,6 +16,7 @@ run: build-cli
 build-web: bin
 	go build -o bin/badswede-web cmds/web/main.go
 	cp -r cmds/web/templates bin
+	cp -r cmds/web/static bin
 
 .PHONY: web
 web: build-web

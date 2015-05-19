@@ -13,7 +13,7 @@ import (
 
 func renderFunc(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path, r.Host)
-	render := render.New()
+	render := render.New(render.Options{Layout: "layout"})
 	query := badswede.Query{"Gothenburg Open 2015", []string{"Rasmus Janmyr", "Tove Rasmusson", "Nils Ihse"}}
 	scraper := badswede.NewScraper()
 	tournament, err := scraper.Scrape(query)
@@ -26,6 +26,8 @@ func renderFunc(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	router := mux.NewRouter().StrictSlash(false)
+	router.PathPrefix("/static").Handler(
+		http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	router.PathPrefix("/").HandlerFunc(renderFunc)
 	http.Handle("/", router)
 }
