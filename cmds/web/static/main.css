@@ -15,8 +15,7 @@ a:hover, a:visited {
 .container {
   background-color: white;
   padding: 30px 0;
-  margin: 60px;
-  margin: 0 30px;
+  margin: 60px 30px;
 }
 
 .search {
@@ -29,7 +28,8 @@ input {
   border-radius: 5px;
   border: inset #ddd 2px;
   padding: 3px 6px;
-  width: 400px;
+  width: 600px;
+  margin-right: 10px;
 }
 
 
